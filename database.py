@@ -49,13 +49,16 @@ def sort():
 	# sort by score
 	sorted(rankingScore.values())
 
-	print rankingScore
-	print rankingName
+	reverse = len(rankingName) - 1
 
 	for i in range(0, len(rankingName)):
 
-		sql = "UPDATE score SET rank = '%d' WHERE name = '%s' AND score = '%d'" % (i + 1, rankingName[i], rankingScore[i])
+		key = rankingScore.values()[reverse];
+
+		sql = "UPDATE score SET rank = '%d' WHERE name = '%s' AND score = '%d'" % (i + 1, rankingName[key], rankingScore[key])
 		cursor.execute(sql)
+
+		reverse -= 1;
 
 def addScore(name, score):
 	# store new score
@@ -79,24 +82,28 @@ def displayScore():
 	# get ranks
 	sql = "SELECT rank FROM score"
 	cursor.execute(sql)
-	rankList = cursor.fetchall()
+	rank = cursor.fetchall()
+	
+	rankList = []
+	for i in rank:
+		rankList.append(i[0])
 
-	# get names
-	sql = "SELECT name FROM score"
-	cursor.execute(sql)
-	nameList = cursor.fetchall()
-
-	# get scores
-	sql = "SELECT score FROM score"
-	cursor.execute(sql)
-	scoreList = cursor.fetchall()
+	rankList = sorted(rankList)
 
 	# print
 	if not rankList:
 		print "No Scores"
 	else:
-		print "Rank: %d\nName: %s\nScore: %s\n" % (rankList[0][0], nameList[0][0], scoreList[0][0])
-		print "Rank: %d\nName: %s\nScore: %s\n" % (rankList[1][0], nameList[1][0], scoreList[1][0])
+		for i in range(0, len(rankList)):
+			sql = "SELECT name FROM score WHERE rank = '%d'" % (i + 1)
+			cursor.execute(sql)
+			name = cursor.fetchall()
+			sql = "SELECT score FROM score WHERE rank = '%d'" % (i + 1)
+			cursor.execute(sql)
+			score = cursor.fetchall() 
+
+			print("Rank: %d Name: %s Score: %d") % (i + 1, name[0][0], score[0][0])
+
 
 resetScore()
 addScore("AAA", 0)
